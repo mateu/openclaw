@@ -23,6 +23,7 @@ import {
   uiProofArtifactDir,
   waitForPatch,
 } from "./session-management.test-support.ts";
+import { waitForSettledFormControls } from "./settle.test-support.ts";
 
 const suite = createSessionManagementE2eSuite();
 
@@ -95,7 +96,10 @@ suite.define(() => {
         )
         .toEqual([mainKey]);
 
+      await waitForSettledFormControls(page, [{ locator: composer, value: "Keep this unsent" }]);
       await composer.fill("");
+      await waitForSettledFormControls(page, [{ locator: composer, value: "" }]);
+      await expect.poll(() => draft.count()).toBe(0);
       await secondRow.getByRole("link").click();
       await expect.poll(() => new URL(page.url()).pathname).toBe(controlUiSessionPath(secondKey));
       await expect.poll(() => draft.count()).toBe(0);
